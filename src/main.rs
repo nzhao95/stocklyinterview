@@ -19,14 +19,16 @@ pub fn extract(input : &str) -> (usize, Vec<usize>){
     (n, list)
 }
 
+use std::fmt::Write;
+
 pub fn format(vector : Vec<usize>) -> String {
-    let mut result = String::new();
+    let mut result = String::with_capacity(vector.len());
     //Might be slow could find better way
     for i in vector.iter() {
-        result = format!("{} {}", result, *i);
+        write!(&mut result, "{i} ");
     }
 
-    result.strip_prefix(" ").unwrap().to_owned()
+    result.strip_suffix(" ").unwrap().to_owned()
 }
 
 #[derive(Debug, Eq, PartialEq) ]
