@@ -1,7 +1,5 @@
 
 use std::io;
-use std::collections::VecDeque;
-
 
 pub fn extract(input : &str) -> (usize, Vec<usize>){
     let mut lines = input.lines();
@@ -29,42 +27,35 @@ pub fn format(vector : Vec<usize>) -> String {
     result.strip_prefix(" ").unwrap().to_owned()
 }
 
-#[derive(Debug, Eq, PartialEq) ]
-struct Intersection {
-    index : usize,
-    distance : usize
-}
 
 
 pub fn compute_dist(shortcuts : Vec<usize>, n : usize) -> Vec<usize> {
     let mut distances: Vec<usize> = vec![usize::MAX; n];
     distances[0] = 0;
-    let mut queue : VecDeque<Intersection> = VecDeque::new();
-    queue.push_back(Intersection{ index : 0, distance : 0});
+    let mut queue : Vec<usize> = Vec::new();
+    queue.push(0);
 
-    while let Some(Intersection{index : curr_index, distance : curr_dist}) = queue.pop_front() {
+    while let Some(curr_index) = queue.pop() {
         //If this happens it means we found a shorted path
-        if curr_dist > distances[curr_index] {
-            continue;
-        }
+        let curr_dist = distances[curr_index];
 
         //Test the destination which should become the next shortest destination
         let destination = shortcuts[curr_index] - 1;
 
         if curr_dist + 1 < distances[destination] {
-            queue.push_back(Intersection{index : destination, distance : curr_dist + 1});
+            queue.push(destination);
             distances[destination] = curr_dist + 1;
         }
 
         //But also the next value
         if curr_index < n-1 && curr_dist + 1 < distances[curr_index + 1] {
-            queue.push_back(Intersection{index : curr_index + 1, distance : curr_dist + 1});
+            queue.push(curr_index + 1);
             distances[curr_index + 1] = curr_dist + 1;
         }
 
         //But also the previous value
         if curr_index > 0 && curr_dist + 1 < distances[curr_index - 1] {
-            queue.push_back(Intersection{index : curr_index - 1, distance : curr_dist + 1});
+            queue.push(curr_index - 1);
             distances[curr_index - 1] = curr_dist + 1;
         }
     }
