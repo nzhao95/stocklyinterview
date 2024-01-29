@@ -27,8 +27,6 @@ pub fn format(vector : Vec<usize>) -> String {
     result.strip_prefix(" ").unwrap().to_owned()
 }
 
-
-
 pub fn compute_dist(shortcuts : Vec<usize>, n : usize) -> Vec<usize> {
     let mut distances: Vec<usize> = vec![usize::MAX; n];
     distances[0] = 0;
@@ -42,22 +40,22 @@ pub fn compute_dist(shortcuts : Vec<usize>, n : usize) -> Vec<usize> {
         //Test the destination which should become the next shortest destination
         let destination = shortcuts[curr_index] - 1;
 
-        if curr_dist + 1 < distances[destination] {
-            queue.push(destination);
-            distances[destination] = curr_dist + 1;
-        }
-
-        //But also the next value
-        if curr_index < n-1 && curr_dist + 1 < distances[curr_index + 1] {
-            queue.push(curr_index + 1);
-            distances[curr_index + 1] = curr_dist + 1;
-        }
-
         //But also the previous value
         if curr_index > 0 && curr_dist + 1 < distances[curr_index - 1] {
             queue.push(curr_index - 1);
             distances[curr_index - 1] = curr_dist + 1;
         }
+        //But also the next value
+        if curr_index < n-1 && curr_dist + 1 < distances[curr_index + 1] {
+            queue.push(curr_index + 1);
+            distances[curr_index + 1] = curr_dist + 1;
+        }
+        if curr_dist + 1 < distances[destination] {
+            queue.push(destination);
+            distances[destination] = curr_dist + 1;
+        }
+
+
     }
 
     distances
@@ -71,7 +69,6 @@ fn main() -> io::Result<()> {
     println!("{output}");
     Ok(())
 }
-
 
 #[test]
 fn test_extract() {
