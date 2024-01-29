@@ -1,5 +1,7 @@
 
+use std::collections::BinaryHeap;
 use std::io;
+
 
 pub fn extract(input : &str) -> (usize, Vec<usize>){
     let mut lines = input.lines();
@@ -27,31 +29,51 @@ pub fn format(vector : Vec<usize>) -> String {
     result.strip_prefix(" ").unwrap().to_owned()
 }
 
+#[derive(Debug, Eq, PartialEq) ]
+struct Intersection {
+    index : usize,
+    distance : usize
+}
+
+impl Ord for Intersection {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        other.distance.cmp(&self.distance)
+    }
+}
+
+impl PartialOrd for Intersection {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
 pub fn compute_dist(shortcuts : Vec<usize>, n : usize) -> Vec<usize> {
     let mut distances: Vec<usize> = vec![usize::MAX; n];
     distances[0] = 0;
-    let mut queue : Vec<usize> = Vec::new();
-    queue.push(0);
+    let mut min_heap : BinaryHeap<Intersection> = BinaryHeap::new();
+    min_heap.push(Intersection{ index : 0, distance : 0});
 
-    while let Some(curr_index) = queue.pop() {
+    while let Some(Intersection{index : curr_index, distance : curr_dist}) = min_heap.pop() {
         //If this happens it means we found a shorted path
-        let curr_dist = distances[curr_index];
+        if curr_dist > distances[curr_index] {
+            continue;
+        }
 
         //Test the destination which should become the next shortest destination
         let destination = shortcuts[curr_index] - 1;
 
         //But also the previous value
         if curr_index > 0 && curr_dist + 1 < distances[curr_index - 1] {
-            queue.push(curr_index - 1);
+            min_heap.push(Intersection{index : curr_index - 1, distance : curr_dist + 1});
             distances[curr_index - 1] = curr_dist + 1;
         }
         //But also the next value
         if curr_index < n-1 && curr_dist + 1 < distances[curr_index + 1] {
-            queue.push(curr_index + 1);
+            min_heap.push(Intersection{index : curr_index + 1, distance : curr_dist + 1});
             distances[curr_index + 1] = curr_dist + 1;
         }
         if curr_dist + 1 < distances[destination] {
-            queue.push(destination);
+            min_heap.push(Intersection{index : destination, distance : curr_dist + 1});
             distances[destination] = curr_dist + 1;
         }
 
@@ -60,7 +82,6 @@ pub fn compute_dist(shortcuts : Vec<usize>, n : usize) -> Vec<usize> {
 
     distances
 }
-
 fn main() -> io::Result<()> {
     let stdin = io::read_to_string(io::stdin())?;
     let (n, shortcuts) = extract(&stdin);
