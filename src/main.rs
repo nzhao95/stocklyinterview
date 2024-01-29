@@ -1,4 +1,4 @@
-use std::io;
+
 use std::collections::VecDeque;
 
 
@@ -28,7 +28,6 @@ pub fn format(vector : Vec<usize>) -> String {
     result.strip_prefix(" ").unwrap().to_owned()
 }
 
-#[derive(Debug, Eq, PartialEq) ]
 struct Intersection {
     index : usize,
     distance : usize
@@ -65,16 +64,14 @@ pub fn compute_dist(shortcuts : Vec<usize>, n : usize) -> Vec<usize> {
     distances
 }
 
-use std::io:: Write;
-fn main() {
-    let mut input =  String::new();
-    io::stdin().read_line(&mut input);
-    let (n, shortcuts) = extract(&input);
-    let answer = compute_dist(shortcuts, n);let stdout = io::stdout(); // get the global stdout entity
-    let mut handle = io::BufWriter::new(stdout); // optional: wrap that handle in a buffer
-
-    let output = format(answer);
-    writeln!(handle, "{}", &output);
+use std::io;
+fn main() -> io::Result<()> {
+    let stdin = io::read_to_string(io::stdin())?;
+    let (n, shortcuts) = extract(&stdin);
+    let result = compute_dist(shortcuts, n);
+    let output = format(result);
+    println!("{output}");
+    Ok(())
 }
 
 
