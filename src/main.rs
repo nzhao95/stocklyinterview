@@ -1,5 +1,5 @@
-use std::collections::BinaryHeap;
 use std::io;
+use std::collections::VecDeque;
 
 
 pub fn extract(input : &str) -> (usize, Vec<usize>){
@@ -34,25 +34,13 @@ struct Intersection {
     distance : usize
 }
 
-impl Ord for Intersection {
-    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        other.distance.cmp(&self.distance)
-    }
-}
-
-impl PartialOrd for Intersection {
-    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        Some(self.cmp(other))
-    }
-}
-
 pub fn compute_dist(shortcuts : Vec<usize>, n : usize) -> Vec<usize> {
     let mut distances: Vec<usize> = vec![usize::MAX; n];
     distances[0] = 0;
-    let mut min_heap : BinaryHeap<Intersection> = BinaryHeap::new();
-    min_heap.push(Intersection{ index : 0, distance : 0});
+    let mut queue : VecDeque<Intersection> = VecDeque::new();
+    queue.push_front(Intersection{ index : 0, distance : 0});
 
-    while let Some(Intersection{index : curr_index, distance : curr_dist}) = min_heap.pop() {
+    while let Some(Intersection{index : curr_index, distance : curr_dist}) = queue.pop_back() {
         //If this happens it means we found a shorted path
         if curr_dist > distances[curr_index] {
             continue;
@@ -62,13 +50,13 @@ pub fn compute_dist(shortcuts : Vec<usize>, n : usize) -> Vec<usize> {
         let destination = shortcuts[curr_index] - 1;
 
         if curr_dist + 1 < distances[destination] {
-            min_heap.push(Intersection{index : destination, distance : curr_dist + 1});
+            queue.push_front(Intersection{index : destination, distance : curr_dist + 1});
             distances[destination] = curr_dist + 1;
         }
 
         //But also the next value
         if curr_index < n-1 && curr_dist + 1 < distances[curr_index + 1] {
-            min_heap.push(Intersection{index : curr_index + 1, distance : curr_dist + 1});
+            queue.push_front(Intersection{index : curr_index + 1, distance : curr_dist + 1});
             distances[curr_index + 1] = curr_dist + 1;
         }
 
@@ -77,7 +65,16 @@ pub fn compute_dist(shortcuts : Vec<usize>, n : usize) -> Vec<usize> {
     distances
 }
 
+use std::io:: Write;
 fn main() {
+    let mut input =  String::new();
+    io::stdin().read_line(&mut input);
+    let (n, shortcuts) = extract(&input);
+    let answer = compute_dist(shortcuts, n);let stdout = io::stdout(); // get the global stdout entity
+    let mut handle = io::BufWriter::new(stdout); // optional: wrap that handle in a buffer
+
+    let output = format(answer);
+    writeln!(handle, "{}", &output);
 }
 
 
