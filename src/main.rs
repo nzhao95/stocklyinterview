@@ -1,4 +1,5 @@
 
+use std::io;
 use std::collections::VecDeque;
 
 
@@ -28,18 +29,20 @@ pub fn format(vector : Vec<usize>) -> String {
     result.strip_prefix(" ").unwrap().to_owned()
 }
 
+#[derive(Debug, Eq, PartialEq) ]
 struct Intersection {
     index : usize,
     distance : usize
 }
 
+
 pub fn compute_dist(shortcuts : Vec<usize>, n : usize) -> Vec<usize> {
     let mut distances: Vec<usize> = vec![usize::MAX; n];
     distances[0] = 0;
     let mut queue : VecDeque<Intersection> = VecDeque::new();
-    queue.push_front(Intersection{ index : 0, distance : 0});
+    queue.push_back(Intersection{ index : 0, distance : 0});
 
-    while let Some(Intersection{index : curr_index, distance : curr_dist}) = queue.pop_back() {
+    while let Some(Intersection{index : curr_index, distance : curr_dist}) = queue.pop_front() {
         //If this happens it means we found a shorted path
         if curr_dist > distances[curr_index] {
             continue;
@@ -49,22 +52,26 @@ pub fn compute_dist(shortcuts : Vec<usize>, n : usize) -> Vec<usize> {
         let destination = shortcuts[curr_index] - 1;
 
         if curr_dist + 1 < distances[destination] {
-            queue.push_front(Intersection{index : destination, distance : curr_dist + 1});
+            queue.push_back(Intersection{index : destination, distance : curr_dist + 1});
             distances[destination] = curr_dist + 1;
         }
 
         //But also the next value
         if curr_index < n-1 && curr_dist + 1 < distances[curr_index + 1] {
-            queue.push_front(Intersection{index : curr_index + 1, distance : curr_dist + 1});
+            queue.push_back(Intersection{index : curr_index + 1, distance : curr_dist + 1});
             distances[curr_index + 1] = curr_dist + 1;
         }
 
+        //But also the previous value
+        if curr_index > 0 && curr_dist + 1 < distances[curr_index - 1] {
+            queue.push_back(Intersection{index : curr_index - 1, distance : curr_dist + 1});
+            distances[curr_index - 1] = curr_dist + 1;
+        }
     }
 
     distances
 }
 
-use std::io;
 fn main() -> io::Result<()> {
     let stdin = io::read_to_string(io::stdin())?;
     let (n, shortcuts) = extract(&stdin);
